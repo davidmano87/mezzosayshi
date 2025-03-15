@@ -1,38 +1,43 @@
 {
-  description = "Mezzo says hi 👋";
+  description = "A simple Python environment with uv";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";  # Or a stable version like nixpkgs-24.05
   };
 
-  outputs = { self, nixpkgs }:
-  let
+  outputs = { self, nixpkgs }: let
     supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+
     forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
 
-  in forAllSystems (system:
-  let
-    pkgs = import nixpkgs { inherit system; };
   in {
-    packages.default = pkgs.python311.pkgs.buildPythonPackage {
-      pname = "mezzosayshi";
-      version = "0.0.5";
-      src = pkgs.lib.cleanSource ./.;
-      format = "pyproject";
-      nativeBuildInputs = [ pkgs.uv ];
-    };
+    devShells = forAllSystems (system: let
+      pkgs = import nixpkgs { inherit system; };
+    in {
+      default = pkgs.mkShell {
+        buildInputs = [ pkgs.python3 pkgs.python3Packages.uv ];
+        shellHook = ''echo "Dev shell for ${system} with uv installed."'';
+      };
+    });
 
-    apps.default = {
-      type = "app";
-      program = "${self.packages.${system}.default}/bin/mezzosayshi";
-    };
+    packages = forAllSystems (system: let
+      pkgs = import nixpkgs { inherit system; };
+    in {
+      default = pkgs.writeShellScriptBin "mezzosayshi" ''
+        if [ ! -d ".venv" ]; then
+          echo "Setting up virtual environment..."
+          uv venv --python=${pkgs.python3}/bin/python3
+          uv pip install -r pyproject.toml
+        fi
+        mezzosayshi
+      '';
+    });
 
-    devShells.default = pkgs.mkShell {
-      buildInputs = [
-        pkgs.python311
-        pkgs.uv
-      ];
-      shellHook = "uv venv --system-site-packages .venv";
-    };
-  });
+    apps = forAllSystems (system: {
+      default = {
+        type = "app";
+        program = "${self.packages.${system}.default}/bin/mezzosayshi";
+      };
+    });
+  };
 }
