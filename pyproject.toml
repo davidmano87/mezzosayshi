@@ -18,7 +18,7 @@ mezzosayshi = "src.main:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
 
-[dependency-groups]
+[project.optional-dependencies]
 build = [
     "shiv>=1.0.8",
 ]
