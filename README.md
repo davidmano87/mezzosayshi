@@ -23,11 +23,15 @@ uv run mezzosayshi               # Run application
 uv add <package>                 # Add dependency
 ```
 
-### Build binaries
+### Build binary
 
 ```bash
+uv pip install -r pyproject.toml
+# Workaround, see https://github.com/astral-sh/uv/issues/8590
+uv export --only-group=build | uv pip install --requirements=-
 uvx shiv -c mezzosayshi -o mezzosayshi -p '/usr/bin/env python3' .
 
+# Optional: move the binary to a location added to PATH
 mkdir -p ~/.local/bin
 mv mezzosayshi ~/.local/bin
 ```

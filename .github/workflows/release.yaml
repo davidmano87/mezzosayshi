@@ -22,7 +22,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install uv
           uv venv
-          uv pip install -r pyproject.toml --extra build
+          uv pip install -r pyproject.toml
+          uv export --only-group=build | uv pip install --requirements=-
 
       - name: Build Binary
         run: uvx shiv -c mezzosayshi -o mezzosayshi -p '/usr/bin/env python3' .
