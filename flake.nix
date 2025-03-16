@@ -23,14 +23,27 @@
     packages = forAllSystems (system: let
       pkgs = import nixpkgs { inherit system; };
     in {
-      default = pkgs.writeShellScriptBin "mezzosayshi" ''
-        if [ ! -d ".venv" ]; then
-          echo "Setting up virtual environment..."
+      default = pkgs.stdenv.mkDerivation rec {
+        pname = "mezzosayshi";
+        version = "0.0.7";
+        src = ./.;
+        buildInputs = [ pkgs.python3 pkgs.python3Packages.uv ];
+        buildPhase = ''
+          export HOME=$(pwd)
+          mkdir -p $out/bin
           uv venv --python=${pkgs.python3}/bin/python3
-          uv pip install .
-        fi
-        mezzosayshi "$@"
-      '';
+          uv export --only-group=build | uv pip install --requirements=-
+          uvx shiv -c mezzosayshi -o $out/bin/mezzosayshi -p '/usr/bin/env python3' .
+        '';
+        meta = with pkgs.lib; {
+          description = "Mezzo says hi 👋";
+          longDescription = ''
+            Mezzo says hi 👋
+          '';
+          license = licenses.mit;
+          maintainers = with maintainers; [ me ];
+        };
+      };
     });
 
     apps = forAllSystems (system: {
