@@ -2,7 +2,7 @@
   description = "A simple Python environment with uv";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";  # Or a stable version like nixpkgs-24.05
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
   outputs = { self, nixpkgs }: let
@@ -29,7 +29,7 @@
           uv venv --python=${pkgs.python3}/bin/python3
           uv pip install -r pyproject.toml
         fi
-        mezzosayshi
+        mezzosayshi "$@"
       '';
     });
 
