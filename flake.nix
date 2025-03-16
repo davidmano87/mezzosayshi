@@ -27,7 +27,7 @@
         if [ ! -d ".venv" ]; then
           echo "Setting up virtual environment..."
           uv venv --python=${pkgs.python3}/bin/python3
-          uv pip install -r pyproject.toml
+          uv pip install .
         fi
         mezzosayshi "$@"
       '';
